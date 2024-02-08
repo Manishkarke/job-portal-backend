@@ -18,7 +18,7 @@ const {
   verifyOtp,
   resetPassword,
 } = require("../controller/user/userController");
-const { isAuthenticated, userRole } = require("../middleware/isAuthenticated");
+const { isAuthenticated, userRole } = require("../middleware/jwt_validator");
 const router = express.Router();
 const { multer, storage } = require("./../services/multerConfig");
 const { paymentVerify } = require("../services/khaltiPayment");
@@ -30,7 +30,7 @@ router.route("/login").post(logIn);
 router
   .route("/registerAsVendor")
   .post(isAuthenticated, userRole("user"), registerAsVendor);
-router.route("/send-otp").post(sendOtp); 
+router.route("/send-otp").post(sendOtp);
 router.route("/verify-otp").post(verifyOtp);
 router.route("/reset-password").post(resetPassword);
 
