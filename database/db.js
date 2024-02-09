@@ -1,6 +1,4 @@
 const mongoose = require("mongoose");
-const userModel = require("../model/userModel");
-const bcrypt = require("bcryptjs");
 
 // Database connection
 function mongoConnection(url) {

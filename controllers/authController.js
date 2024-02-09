@@ -1,74 +1,53 @@
 const userModel = require("../model/userModel");
-const emailRegex = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
+const { authDataValidator } = require("../services/data_validator");
+const { hashPasswordGenerator } = require("../services/hash_password");
+const { sendOtpMail } = require("../services/mail_service");
+const otpGenerator = require("../services/otpGenerator");
 
+// Registration function
 module.exports.register = async (req, res) => {
   const { email, name, password } = req.body;
-  let errors = {};
-
-  // Name validation
-  if (!name || !name.trim()) errors = { ...errors, name: "Name is required" };
-  else if (!name.match(/^[a-zA-Z\s]+$/))
-    errors = { ...errors, name: "Name is invalid" };
-  else errors = { ...errors, name: "" };
-
-  // Email validation
-  if (!email || !email.trim())
-    errors = { ...errors, email: "Email is required" };
-  else if (!email.match(emailRegex))
-    errors = { ...errors, email: "Email is invalid" };
-  else errors = { ...errors, email: "" };
-
-  if (!password || !password.trim())
-    errors = { ...errors, password: "Password is required" };
-  else if (!password.match(/[A-Z]/))
-    errors = {
-      ...errors,
-      password: "Password must contain atleast one uppercase character",
-    };
-  else if (!password.match(/[a-z]/))
-    errors = {
-      ...errors,
-      password: "Password must contain at least one lowercase character",
-    };
-  else if (!password.match(/[0-9]/))
-    errors = {
-      ...errors,
-      password: "Password must contain atleast one number",
-    };
-  else errors = { ...errors, password: "" };
-
-  const userExist = await userModel.findOne({ email: email });
-  if (userExist) {
-    if (!userExist.isVerified) {
-      return res.json({
-        status: 400,
-        message: "User is already registered but not verified.",
-      });
-    } else {
-      return res.json({
-        status: 400,
-        message: "User is already registered.",
-      });
+  let errors = authDataValidator(req.body, "registration");
+  let isFormValid = true;
+  for (const error in errors) {
+    if (errors[error]) {
+      isFormValid = false;
+      break;
     }
   }
+  if (isFormValid) {
+    const userExist = await userModel.findOne({ email: email });
+    if (userExist) {
+      if (!userExist.isVerified) {
+        throw "User already exist but is not verified";
+      } else {
+        throw "User already exist.";
+      }
+    }
 
-  const otp = otpGenerator(); // Generate otp and return it
+    const otp = otpGenerator();
 
-  const user = await userModel.create({
-    name,
-    email,
-    password: bcrypt.hashSync(password, 10), // Hashing the password
-    otp: otp,
-  });
-  const emailOption = {
-    email: email,
-    otp: otp,
-    userName: name,
-  };
-  if (user) {
-    sendEmail(emailOption);
-    return res.json({ status: 200, message: "User registered successfully" });
+    const user = await userModel.create({
+      name,
+      email,
+      password: hashPasswordGenerator(password), // Hashing the password
+      otp: otp,
+    });
+    if (!user) throw "User registration failed";
+    const emailOption = {
+      email: email,
+      otp: otp,
+      userName: name,
+    };
+    sendOtpMail(emailOption);
+    res.json({
+      status: "success",
+      message: "User registration successfull",
+      data: null,
+    });
   } else {
-    return res.json({ status: 400, message: "User not registered" });
+    throw { type: "VALIDATION_ERROR", message: errors };
   }
 };
+
+

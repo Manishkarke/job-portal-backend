@@ -1,6 +1,6 @@
 const express = require("express");
 const {
-  register,
+  // register,
   logIn,
   registerAsVendor,
   getAllJobs,
@@ -17,14 +17,14 @@ const {
   sendOtp,
   verifyOtp,
   resetPassword,
-} = require("../controller/user/userController");
+} = require("../controllers/userController");
 const { isAuthenticated, userRole } = require("../middleware/jwt_validator");
 const router = express.Router();
 const { multer, storage } = require("./../services/multerConfig");
 const { paymentVerify } = require("../services/khaltiPayment");
 const upload = multer({ storage: storage });
 
-router.route("/register").post(register);
+// router.route("/register").post(register);
 router.route("/verifyEmail").post(verifyRegistration);
 router.route("/login").post(logIn);
 router

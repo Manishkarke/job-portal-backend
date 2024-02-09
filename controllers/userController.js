@@ -1,61 +1,60 @@
-const userModel = require("../../model/userModel");
-const bcrypt = require("bcryptjs");
-const vendorModel = require("../../model/vendorModel");
-const jobModel = require("../../model/jobModel");
-const appliedJobModel = require("../../model/appliedJobModel");
-const sendEmail = require("../../services/sendEmail");
-const reviewsModel = require("../../model/reviewsModel");
-const Review = require("../../model/reviewsModel");
-const otpGenerator = require("../../services/otpGenerator");
+const userModel = require("../model/userModel");
+const vendorModel = require("../model/vendorModel");
+const jobModel = require("../model/jobModel");
+const appliedJobModel = require("../model/appliedJobModel");
+// const sendEmail = require("../services/");
+const reviewsModel = require("../model/reviewModel");
+// const Review = require("../model/reviewsModel");
+const otpGenerator = require("../services/otpGenerator");
 
-exports.register = async (req, res) => {
-  try {
-    const { email, name, password } = req.body;
-    if (!name || !email || !password) {
-      return res.json({ status: 400, message: "Please enter all fields" });
-    }
+// exports.register = async (req, res) => {
+//   try {
+//     const { email, name, password } = req.body;
+//     if (!name || !email || !password) {
+//       return res.json({ status: 400, message: "Please enter all fields" });
+//     }
 
-    const userExist = await userModel.findOne({ email: email });
-    if (userExist) {
-      if (!userExist.isVerified) {
-        return res.json({
-          status: 400,
-          message: "User is already registered but not verified.",
-        });
-      } else {
-        return res.json({
-          status: 400,
-          message: "User is already registered.",
-        });
-      }
-    }
+//     const userExist = await userModel.findOne({ email: email });
+//     if (userExist) {
+//       if (!userExist.isVerified) {
+//         return res.json({
+//           status: 400,
+//           message: "User is already registered but not verified.",
+//         });
+//       } else {
+//         return res.json({
+//           status: 400,
+//           message: "User is already registered.",
+//         });
+//       }
+//     }
 
-    const otp = otpGenerator(); // Generate otp and return it
+//     const otp = otpGenerator(); // Generate otp and return it
 
-    const user = await userModel.create({
-      name,
-      email,
-      password: bcrypt.hashSync(password, 10), // Hashing the password
-      otp: otp,
-    });
-    const emailOption = {
-      email: email,
-      otp: otp,
-      userName: name,
-    };
-    if (user) {
-      sendEmail(emailOption);
-      return res.json({ status: 200, message: "User registered successfully" });
-    } else {
-      return res.json({ status: 400, message: "User not registered" });
-    }
-  } catch (error) {
-    res.json({
-      status: 400,
-      message: error.message,
-    });
-  }
-};
+//     const user = await userModel.create({
+//       name,
+//       email,
+//       password: bcrypt.hashSync(password, 10), // Hashing the password
+//       otp: otp,
+//     });
+//     const emailOption = {
+//       email: email,
+//       otp: otp,
+//       userName: name,
+//     };
+//     if (user) {
+//       sendEmail(emailOption);
+//       return res.json({ status: 200, message: "User registered successfully" });
+//     } else {
+//       return res.json({ status: 400, message: "User not registered" });
+//     }
+//   } catch (error) {
+//     res.json({
+//       status: 400,
+//       message: error.message,
+//     });
+//   }
+// };
 
 exports.verifyRegistration = async (req, res) => {
   try {
