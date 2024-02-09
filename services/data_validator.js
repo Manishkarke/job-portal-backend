@@ -30,22 +30,22 @@ module.exports.authDataValidator = (
   // Password validation
   if (!password || !password.trim()) {
     errors = { ...errors, password: "Password is required" };
-  } else if (!password.match(/[A-Z]/)) {
+  } else if (!password.match(/[A-Z]/) && validationFor === "registration") {
     errors = {
       ...errors,
       password: "Password must contains atleast one uppercase character",
     };
-  } else if (!password.match(/[a-z]/)) {
+  } else if (!password.match(/[a-z]/) && validationFor === "registration") {
     errors = {
       ...errors,
       password: "Password must contains at least one lowercase character",
     };
-  } else if (!password.match(/[0-9]/)) {
+  } else if (!password.match(/[0-9]/) && validationFor === "registration") {
     errors = {
       ...errors,
       password: "Password must contains atleast one number",
     };
-  } else if (password.length < 8) {
+  } else if (password.length < 8 && validationFor === "registration") {
     errors = {
       ...errors,
       password: "Password must contains atleast 8 characters",
