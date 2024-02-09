@@ -8,8 +8,10 @@ const {
   createAccessToken,
   createRefreshToken,
 } = require("../services/jwt_handler");
-const { sendOtpMail } = require("../services/mail_service");
+const { sendOtpMail, sendResetMail } = require("../services/mail_service");
 const otpGenerator = require("../services/otpGenerator");
+
+const emailRegex = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
 
 // Registration route handler function
 module.exports.register = async (req, res) => {
@@ -48,7 +50,7 @@ module.exports.register = async (req, res) => {
       userName: name,
     };
     sendOtpMail(emailOption);
-    res.json({
+    return res.json({
       status: "success",
       message: "User registration successfull",
       data: null,
@@ -131,7 +133,7 @@ module.exports.signIn = async (req, res) => {
         isVerified: emailExists.isVerified,
       };
 
-      res.json({
+      return res.json({
         status: "success",
         message: "Welcome back! You have successfully logged in.",
         data: {
@@ -147,3 +149,72 @@ module.exports.signIn = async (req, res) => {
 };
 
 // Send OTP Route handler function
+module.exports.sendOtp = async (req, res) => {
+  const { email } = req.body;
+
+  if (!email || !email.trim()) throw "Email is required";
+  if (!email.match(emailRegex)) throw "Email is invalid";
+
+  const emailExists = await userModel.findOne({ email });
+  if (!emailExists) throw "Email does not exist";
+
+  const otp = otpGenerator();
+  emailExists.otp = otp;
+  await emailExists.save();
+
+  const emailOption = {
+    email: email,
+    otp: otp,
+    userName: emailExists.name,
+  };
+  sendResetMail(emailOption);
+  return res.json({ status: "success", message: "Otp sent successfully" });
+};
+
+// Verify OTP for reset password route handler function
+module.exports.verifyOtp = async (req, res) => {
+  const { email, otp } = req.body;
+
+  if (!email || !email.trim()) throw "Email is required";
+  else if (!email.match(emailRegex)) throw "Email is invalid";
+
+  if (!otp || !otp.trim()) throw "OTP is required";
+
+  const emailExists = await userModel.findOne({ email: email });
+  if (!emailExists) throw "Email is not registered.";
+
+  if (emailExists.otp !== otp) throw "The OTP entered is incorrect.";
+
+  return res.json({
+    status: 200,
+    message: "Otp verified successfully.",
+    data: null,
+  });
+};
+
+// Reset password route handler function
+module.exports.resetPassword = async (req, res) => {
+  const { otp, email, password } = req.body;
+
+  if (!email || !email.trim()) throw "Email is required";
+  else if (!email.match(emailRegex)) throw "Email is invalid.";
+
+  if (!otp || !otp.trim()) throw "The OTP is required";
+
+  if (!password || !password.trim()) throw "Password is required";
+
+  const user = await userModel.findOne({ email });
+  if (!user) throw "User is not registered.";
+
+  if (user.otp !== otp) throw "Otp was not verified for password reset.";
+
+  user.otp = "";
+  user.password = await hashPasswordGenerator(password);
+  await user.save();
+
+  return res.json({
+    status: "success",
+    message: "Password has been changed.",
+    data: null,
+  });
+};

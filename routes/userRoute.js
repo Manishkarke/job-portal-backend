@@ -24,15 +24,9 @@ const { multer, storage } = require("./../services/multerConfig");
 const { paymentVerify } = require("../services/khaltiPayment");
 const upload = multer({ storage: storage });
 
-// router.route("/register").post(register);
-router.route("/verifyEmail").post(verifyRegistration);
-router.route("/login").post(logIn);
 router
   .route("/registerAsVendor")
   .post(isAuthenticated, userRole("user"), registerAsVendor);
-router.route("/send-otp").post(sendOtp);
-router.route("/verify-otp").post(verifyOtp);
-router.route("/reset-password").post(resetPassword);
 
 // jobs
 router.route("/jobs").get(getAllJobs);
