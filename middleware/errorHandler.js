@@ -1,4 +1,4 @@
-exports.errorHandler = (func) => {
+module.exports.errorHandler = (func) => {
   return (req, res, next) => {
     func(req, res, next).catch((err) => {
       if (typeof err === "string") {

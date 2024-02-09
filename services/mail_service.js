@@ -1,15 +1,17 @@
 const nodemailer = require("nodemailer");
+const MAIL_SETTING = {
+  service: "gmail",
+  auth: {
+    user: process.env.EMAIL,
+    pass: process.env.EMAIL_PASS,
+  },
+};
 
-const sendEmail = async (options) => {
-  var transporter = nodemailer.createTransport({
-    service: "gmail",
+const transporter = nodemailer.createTransport(MAIL_SETTING);
 
-    auth: {
-      user: process.env.EMAIL,
-      pass: process.env.EMAIL_PASS,
-    },
-  });
-  const htmlContent = `
+module.exports.sendOtpMail = async (option) => {
+  try {
+    const htmlContent = `
 <!DOCTYPE html>
 <html>
   <head>
@@ -53,14 +55,14 @@ const sendEmail = async (options) => {
 
   <body>
     <div class="container">
-      <h3 class="greeting">Hi <strong>${options.userName}</strong>,</h3>
+      <h3 class="greeting">Hi <strong>${option.userName}</strong>,</h3>
 
       <p>
         Welcome to Job-<strong>Portal</strong>! 🎉 To complete your registration, please use
         the following OTP (One-Time Password) for verification:
       </p>
 
-      <p class="otp"><strong>${options.otp}</strong></p>
+      <p class="otp"><strong>${option.otp}</strong></p>
 
       <p>
         If you have any questions or need assistance, don't hesitate to contact
@@ -73,24 +75,32 @@ const sendEmail = async (options) => {
 </html>
   `;
 
+    const mailOptions = {
+      from: "Manish Karki <mk4345437@gmail.com>",
+      to: option.email,
+      subject: "Welcome to Job-Portal! Verify Your Account",
+      html: htmlContent,
+    };
 
-  /* Main Content: We understand that forgetting passwords happens to the best of us. No worries! Just enter the email address associated with youryd we'll send you instructions to reset your password.
-
-**Email Address:**
-[_________]   [Submit]
-
-**Note:**
-- Make sure to check your spam folder if you don't receive the email within a few minutes.
-- Still having trouble? Contact our support team at [support@example.com].
-*/
-  const mailOptions = {
-    from: "Manish Karki <mk4345437@gmail.com>",
-    to: options.email,
-    subject: "Welcome to Job-Portal! Verify Your Account",
-    html: htmlContent,
-  };
-
-  await transporter.sendMail(mailOptions);
+    await transporter.sendMail(mailOptions);
+  } catch (err) {
+    console.error(err);
+  }
 };
 
-module.exports = sendEmail;
+module.exports.sendResetMail = async (option) => {
+  try {
+    const htmlContent = `
+    `;
+    const mailOptions = {
+      from: "Manish Karki <mk4345437@gmail.com>",
+      to: option.email,
+      subject: "Reset the password at Job-Portal",
+      html: htmlContent,
+    };
+
+    await transporter.sendMail(mailOptions);
+  } catch (err) {
+    console.error(err);
+  }
+};
