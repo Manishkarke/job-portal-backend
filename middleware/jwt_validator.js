@@ -13,7 +13,6 @@ exports.accessTokenValidator = async (req, res, next) => {
   const user = await userModel.findOne({ email: userEmail });
 
   if (!user) throw "User not found with email: " + userEmail;
-
   req.body.user = user;
   next();
 };

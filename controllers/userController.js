@@ -202,45 +202,6 @@ exports.rateVendor = async (req, res) => {
 };
 
 // profile
-exports.editProfile = async (req, res) => {
-  const { name, email } = req.body; // Assuming that 'name' and 'email' are sent in the request body
-  const image = req.file.filename;
-
-  const updatedFields = {
-    image: `http://localhost:3000/${image}`,
-  };
-
-  if (name) {
-    updatedFields.name = name;
-  }
-
-  if (email) {
-    updatedFields.email = email;
-  }
-
-  const user = await userModel.findByIdAndUpdate(req.userId, updatedFields, {
-    new: true,
-  });
-
-  if (user) {
-    return res.json({ status: 200, message: "Profile updated successfully" });
-  } else {
-    return res.json({ status: 400, message: "Profile not updated" });
-  }
-};
-
-exports.getProfile = async (req, res) => {
-  const user = await userModel
-    .findById(req.userId)
-    .populate("reviews")
-    .select("-password");
-  if (user) {
-    console.log("I am sending data.");
-    return res.json({ status: 200, user });
-  } else {
-    return res.json({ status: 400, message: "User not found" });
-  }
-};
 
 exports.getAllAppliedJobs = async (req, res) => {
   try {

@@ -9,6 +9,7 @@ require("dotenv").config();
 // const adminRoute = require("./routes/adminRoute");
 // const vendorRoute = require("./routes/vendorRoute");
 const authRoute = require("./routes/authRoute");
+const commonRoute = require("./routes/commonRoute");
 
 mongoConnection(process.env.MONGO_URL);
 app.use(express.json());
@@ -31,6 +32,7 @@ app.use(
 app.use(express.json());
 app.use(express.static(path.join(__dirname, "uploads")));
 app.use("/api/auth", authRoute);
+app.use("/api/common", commonRoute);
 // app.use("/api/user", userRoute);
 // app.use("/api/admin", adminRoute);
 // app.use("/api/vendor", vendorRoute);

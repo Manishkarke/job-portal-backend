@@ -48,12 +48,6 @@ router
 //rating
 router.route("/rate/:id").post(isAuthenticated, userRole("user"), rateVendor);
 
-//profile
-router
-  .route("/profile")
-  .patch(isAuthenticated, userRole("user"), upload.single("image"), editProfile)
-  .get(isAuthenticated, userRole("user"), getProfile);
-
 // khalti
 router.route("/pay").post(isAuthenticated, userRole("user"), paymentVerify);
 
