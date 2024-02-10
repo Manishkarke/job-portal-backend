@@ -2,7 +2,10 @@ const bannerModel = require("../model/bannerModel");
 const categoryModel = require("../model/categoryModel");
 const userModel = require("../model/userModel");
 const vendorModel = require("../model/vendorModel");
-const { categoryDataValidator } = require("../services/data_validator");
+const {
+  categoryDataValidator,
+  bannerDataValidator,
+} = require("../services/data_validator");
 
 // Route handler function for accepting vendor request
 module.exports.changeToVendor = async (req, res) => {
@@ -146,32 +149,66 @@ module.exports.createCategory = async (req, res) => {
 // Route handler function for deleting a category
 module.exports.deleteCategory = async (req, res) => {
   const { id } = req.params;
+
   const category = await categoryModel.findByIdAndDelete(id);
-  if (category)
-    return res.json({ status: 200, message: "Category deleted successfully" });
-  else return res.json({ status: 400, message: "Category not deleted" });
+  if (!category) throw "Failed to delete category";
+
+  return res.json({
+    status: "success",
+    message: "Category has been deleted successfully",
+    data: null,
+  });
 };
 
-// banner section
-exports.createBanner = async (req, res) => {
+// Route handler function for uploading banner
+module.exports.createBanner = async (req, res) => {
   const { title } = req.body;
-  console.log(req.file);
-  const banner = await bannerModel.create({
-    title,
-    image: process.env.BACKEND_URL + "/" + req.file.filename,
-  });
-  if (banner)
-    return res.json({ status: 200, message: "Banner created successfully" });
-  else return res.json({ status: 400, message: "Banner not created" });
+  const image = req.file.filename;
+
+  // Error Handling here
+  let errors = bannerDataValidator(title, image);
+  let isFormValid = true;
+  for (const error in errors) {
+    if (errors[error]) {
+      isFormValid = false;
+      break;
+    }
+  }
+
+  if (isFormValid) {
+    const existingBanner = await bannerModel.findOne({ title });
+    if (existingBanner) {
+      throw {
+        type: "VALIDATION_ERROR",
+        message: "Banner with this title already exists",
+      };
+    } else {
+      const banner = await bannerModel.create({
+        title,
+        image: process.env.BACKEND_URL + "/" + image,
+      });
+      if (!banner) throw "Failed to add banner";
+
+      return res.json({
+        status: "success",
+        message: "Banner has been added successfully",
+        data: null,
+      });
+    }
+  } else {
+    throw { type: "VALIDATION_ERROR", message: errors };
+  }
 };
-exports.getAllBanners = async (req, res) => {
-  const banners = await bannerModel.find();
-  return res.json({ status: 200, banners });
-};
-exports.deleteBanner = async (req, res) => {
+
+// Route handler function for deleting banner
+module.exports.deleteBanner = async (req, res) => {
   const { id } = req.params;
   const banner = await bannerModel.findByIdAndDelete(id);
-  if (banner)
-    return res.json({ status: 200, message: "Banner deleted successfully" });
-  else return res.json({ status: 400, message: "Banner not deleted" });
+  if (!banner) throw "Failed to delete banner";
+
+  return res.json({
+    status: "success",
+    message: "Banner has been deleted successfully",
+    data: null,
+  });
 };

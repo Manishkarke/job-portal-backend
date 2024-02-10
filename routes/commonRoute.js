@@ -4,6 +4,7 @@ const {
   getProfile,
   editProfile,
   getAllCategories,
+  getAllBanners,
 } = require("../controllers/commonController");
 const { errorHandler } = require("../middleware/errorHandler");
 const { accessTokenValidator } = require("../middleware/jwt_validator");
@@ -28,5 +29,7 @@ router.get(
   errorHandler(accessTokenValidator),
   errorHandler(getAllCategories)
 );
+
+router.get("/banners", errorHandler(getAllBanners));
 
 module.exports = router;

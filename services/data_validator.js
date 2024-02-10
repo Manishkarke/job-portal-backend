@@ -74,3 +74,26 @@ module.exports.categoryDataValidator = (category, image) => {
 
   return errors;
 };
+
+module.exports.bannerDataValidator = (title, image) => {
+  let errors = {};
+
+  if (!title || !title.trim()) {
+    errors = { ...errors, title: "Title is required" };
+  } else if (!title.match(/^[a-zA-Z\s]+$/)) {
+    errors = {
+      ...errors,
+      title: "Title is invalid. title must only contains letters and space.",
+    };
+  } else {
+    errors = { ...errors, title: "" };
+  }
+
+  if (!image || !image.trim()) {
+    errors = { ...errors, image: "Image is required." };
+  } else {
+    errors = { ...errors, image: "" };
+  }
+
+  return errors;
+};

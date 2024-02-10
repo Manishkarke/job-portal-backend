@@ -71,24 +71,20 @@ router.delete(
   errorHandler(deleteCategory)
 );
 
-//banner api
-router
-  .route("/banner")
-  .post(
-    errorHandler(accessTokenValidator),
-    errorHandler(adminValidator),
-    upload.single("image"),
-    errorHandler(createBanner)
-  )
-  .get(errorHandler(getAllBanners));
+//banner api end
+router.post(
+  "/banner",
+  upload.single("image"),
+  errorHandler(accessTokenValidator),
+  errorHandler(adminValidator),
+  errorHandler(createBanner)
+);
 
-router
-  .route("/banner/:id")
-  // .get(getSingleBanner)
-  .delete(
-    errorHandler(accessTokenValidator),
-    errorHandler(adminValidator),
-    errorHandler(deleteBanner)
-  );
+router.delete(
+  "/banner/:id",
+  errorHandler(accessTokenValidator),
+  errorHandler(adminValidator),
+  errorHandler(deleteBanner)
+);
 
 module.exports = router;

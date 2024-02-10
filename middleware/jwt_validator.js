@@ -25,7 +25,7 @@ module.exports.accessTokenValidator = async (req, res, next) => {
 // }
 
 // User validator
-module.exports.userValidator = (req, res, next) => {
+module.exports.userValidator = async (req, res, next) => {
   const { user } = req.body;
 
   console.log(user.role);
@@ -36,7 +36,7 @@ module.exports.userValidator = (req, res, next) => {
 };
 
 // Validate if user type is vendor
-module.exports.vendorValidator = (req, res, next) => {
+module.exports.vendorValidator = async (req, res, next) => {
   const { user } = req.body;
 
   console.log(user.role);
@@ -47,11 +47,9 @@ module.exports.vendorValidator = (req, res, next) => {
 };
 
 // Validate if user type is admin
-module.exports.adminValidator = (req, res, next) => {
+module.exports.adminValidator = async (req, res, next) => {
   console.error("req.body: ", req.body);
   const { user } = req.body;
-  console.log("user.role: ", user.role);
   if (user.role !== "admin") throw "You are not a admin.";
-  console.log("user.role 2: ", user.role);
   next();
 };

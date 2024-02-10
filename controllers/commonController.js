@@ -54,3 +54,14 @@ module.exports.getAllCategories = async (req, res) => {
   const categories = await categoryModel.find();
   return res.json({ status: 200, categories });
 };
+
+// Route handler function for Getting all the Banners
+module.exports.getAllBanners = async (req, res) => {
+  const banners = await bannerModel.find();
+  if (!banners) throw "No any banners found.";
+  return res.json({
+    status: "success",
+    message: "Banners has been fetched successfully",
+    data: banners,
+  });
+};
