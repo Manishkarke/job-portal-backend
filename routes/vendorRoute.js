@@ -5,7 +5,7 @@ const {
   viewSingleJob,
   myApplicants,
   acceptOrRejectApplicant,
-} = require("../controller/vendor/vendorController");
+} = require("../controllers/vendorController");
 const { errorHandler } = require("../middleware/errorHandler");
 const {
   accessTokenValidator,

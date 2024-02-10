@@ -1,5 +1,5 @@
-const appliedJobModel = require("../../model/appliedJobModel");
-const jobModel = require("../../model/jobModel");
+const appliedJobModel = require("../model/appliedJobModel");
+const jobModel = require("../model/jobModel");
 
 exports.createJob = async (req, res) => {
   const { title, description, location, salary, deadline, categoryId } =

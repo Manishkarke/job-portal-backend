@@ -54,3 +54,23 @@ module.exports.authDataValidator = (
 
   return errors;
 };
+
+module.exports.categoryDataValidator = (category, image) => {
+  let errors = {};
+
+  if (!category || !category.trim()) {
+    errors = { ...errors, category: "Category name is required" };
+  } else if (!category.match(/^[a-zA-Z\s]+$/)) {
+    errors = { ...errors, category: "Category name is invalid" };
+  } else {
+    errors = { ...errors, category: "" };
+  }
+
+  if (!image || !image.trim()) {
+    errors = { ...errors, image: "Image is required" };
+  } else {
+    errors = { ...errors, image: "" };
+  }
+
+  return errors;
+};
