@@ -1,54 +1,79 @@
 const express = require("express");
 const {
-  // register,
-  logIn,
   registerAsVendor,
   getAllJobs,
   getSingleJob,
-  getJobByCategory,
   getJobByCategories,
   applyJob,
   rateVendor,
-  editProfile,
-  getProfile,
   getAllAppliedJobs,
   getSingleAppliedJob,
-  verifyRegistration,
-  sendOtp,
-  verifyOtp,
-  resetPassword,
 } = require("../controllers/userController");
-const { isAuthenticated, userRole } = require("../middleware/jwt_validator");
+const {
+  accessTokenValidator,
+  userValidator,
+} = require("../middleware/jwt_validator");
 const router = express.Router();
 const { multer, storage } = require("./../services/multerConfig");
 const { paymentVerify } = require("../services/khaltiPayment");
+const { errorHandler } = require("../middleware/errorHandler");
 const upload = multer({ storage: storage });
 
+// Register as a vendor
 router
   .route("/registerAsVendor")
-  .post(isAuthenticated, userRole("user"), registerAsVendor);
+  .post(
+    errorHandler(accessTokenValidator),
+    errorHandler(userValidator),
+    errorHandler(registerAsVendor)
+  );
 
 // jobs
-router.route("/jobs").get(getAllJobs);
-router.route("/jobs/:id").get(getSingleJob);
-router.route("/jobs/category/:id").get(getJobByCategories);
+router.route("/jobs").get(errorHandler(getAllJobs));
+router.route("/jobs/:id").get(errorHandler(getSingleJob));
+router.route("/jobs/category/:id").get(errorHandler(getJobByCategories));
 
 // apply job
 router
   .route("/jobs/apply")
-  .post(isAuthenticated, userRole("user"), upload.single("cv"), applyJob);
+  .post(
+    errorHandler(accessTokenValidator),
+    errorHandler(userValidator),
+    upload.single("cv"),
+    errorHandler(applyJob)
+  );
 
 router
   .route("/appliedJobs")
-  .get(isAuthenticated, userRole("user"), getAllAppliedJobs);
+  .get(
+    errorHandler(accessTokenValidator),
+    errorHandler(userValidator),
+    errorHandler(getAllAppliedJobs)
+  );
 router
   .route("/appliedJobs/:id")
-  .get(isAuthenticated, userRole("user"), getSingleAppliedJob);
+  .get(
+    errorHandler(accessTokenValidator),
+    errorHandler(userValidator),
+    errorHandler(getSingleAppliedJob)
+  );
 
 //rating
-router.route("/rate/:id").post(isAuthenticated, userRole("user"), rateVendor);
+router
+  .route("/rate/:id")
+  .post(
+    errorHandler(accessTokenValidator),
+    errorHandler(userValidator),
+    errorHandler(rateVendor)
+  );
 
 // khalti
-router.route("/pay").post(isAuthenticated, userRole("user"), paymentVerify);
+router
+  .route("/pay")
+  .post(
+    errorHandler(accessTokenValidator),
+    errorHandler(userValidator),
+    errorHandler(paymentVerify)
+  );
 
 module.exports = router;

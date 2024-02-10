@@ -1,7 +1,7 @@
 const userModel = require("../model/userModel");
 const jwtHanlder = require("../services/jwt_handler");
 
-exports.accessTokenValidator = async (req, res, next) => {
+module.exports.accessTokenValidator = async (req, res, next) => {
   const bearerToken = req.headers.authorization;
 
   if (!bearerToken || bearerToken.trim() === "")
@@ -10,7 +10,9 @@ exports.accessTokenValidator = async (req, res, next) => {
   const token = bearerToken.split(" ")[1];
   const userEmail = jwtHanlder.validateAccessToken(token);
 
-  const user = await userModel.findOne({ email: userEmail });
+  const user = await userModel
+    .findOne({ email: userEmail })
+    .select("-password");
 
   if (!user) throw "User not found with email: " + userEmail;
   req.body.user = user;
@@ -23,7 +25,7 @@ exports.accessTokenValidator = async (req, res, next) => {
 // }
 
 // User validator
-exports.userValidator = (req, res, next) => {
+module.exports.userValidator = (req, res, next) => {
   const { user } = req.body;
 
   console.log(user.role);
@@ -34,7 +36,7 @@ exports.userValidator = (req, res, next) => {
 };
 
 // Validate if user type is vendor
-exports.userValidator = (req, res, next) => {
+module.exports.vendorValidator = (req, res, next) => {
   const { user } = req.body;
 
   console.log(user.role);
@@ -45,12 +47,11 @@ exports.userValidator = (req, res, next) => {
 };
 
 // Validate if user type is admin
-exports.adminValidator = (req, res, next) => {
+module.exports.adminValidator = (req, res, next) => {
+  console.error("req.body: ", req.body);
   const { user } = req.body;
-
-  console.log(user.role);
-  if (user.role !== "admin") {
-    throw "You are not a admin.";
-  }
+  console.log("user.role: ", user.role);
+  if (user.role !== "admin") throw "You are not a admin.";
+  console.log("user.role 2: ", user.role);
   next();
 };

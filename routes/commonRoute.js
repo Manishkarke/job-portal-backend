@@ -1,6 +1,10 @@
 const router = require("express").Router();
 const multer = require("multer");
-const { getProfile, editProfile } = require("../controllers/commonController");
+const {
+  getProfile,
+  editProfile,
+  getAllCategories,
+} = require("../controllers/commonController");
 const { errorHandler } = require("../middleware/errorHandler");
 const { accessTokenValidator } = require("../middleware/jwt_validator");
 
@@ -17,6 +21,12 @@ router.patch(
   upload.single("image"),
   errorHandler(accessTokenValidator),
   errorHandler(editProfile)
+);
+
+router.get(
+  "/category",
+  errorHandler(accessTokenValidator),
+  errorHandler(getAllCategories)
 );
 
 module.exports = router;

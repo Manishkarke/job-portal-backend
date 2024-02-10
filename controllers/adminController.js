@@ -1,7 +1,7 @@
-const bannerModel = require("../../model/bannerModel");
-const categoryModel = require("../../model/categoryModel");
-const userModel = require("../../model/userModel");
-const vendorModel = require("../../model/vendorModel");
+const bannerModel = require("../model/bannerModel");
+const categoryModel = require("../model/categoryModel");
+const userModel = require("../model/userModel");
+const vendorModel = require("../model/vendorModel");
 
 exports.changeToVendor = async (req, res) => {
   const { userId } = req.body;
@@ -69,10 +69,7 @@ exports.createCategory = async (req, res) => {
     return res.json({ status: 200, message: "Category created successfully" });
   else return res.json({ status: 400, message: "Category not created" });
 };
-exports.getAllCategories = async (req, res) => {
-  const categories = await categoryModel.find();
-  return res.json({ status: 200, categories });
-};
+
 exports.deleteCategory = async (req, res) => {
   const { id } = req.params;
   const category = await categoryModel.findByIdAndDelete(id);

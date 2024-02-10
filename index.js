@@ -6,7 +6,7 @@ const path = require("path");
 
 require("dotenv").config();
 // const userRoute = require("./routes/userRoute");
-// const adminRoute = require("./routes/adminRoute");
+const adminRoute = require("./routes/adminRoute");
 // const vendorRoute = require("./routes/vendorRoute");
 const authRoute = require("./routes/authRoute");
 const commonRoute = require("./routes/commonRoute");
@@ -34,7 +34,7 @@ app.use(express.static(path.join(__dirname, "uploads")));
 app.use("/api/auth", authRoute);
 app.use("/api/common", commonRoute);
 // app.use("/api/user", userRoute);
-// app.use("/api/admin", adminRoute);
+app.use("/api/admin", adminRoute);
 // app.use("/api/vendor", vendorRoute);
 
 const PORT = 3000;

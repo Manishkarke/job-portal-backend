@@ -10,57 +10,85 @@ const {
   deleteBanner,
   deleteCategory,
   rejectVendor,
-} = require("../controller/admin/adminController");
-const { isAuthenticated, userRole } = require("../middleware/jwt_validator");
+} = require("../controllers/adminController");
+const { errorHandler } = require("../middleware/errorHandler");
+const {
+  accessTokenValidator,
+  adminValidator,
+} = require("../middleware/jwt_validator");
 
 const router = require("express").Router();
 const { multer, storage } = require("./../services/multerConfig");
 const upload = multer({ storage: storage });
 
-router
-  .route("/changeToVendor")
-  .post(isAuthenticated, userRole("admin"), changeToVendor);
+router.post(
+  "/changeToVendor",
+  errorHandler(accessTokenValidator),
+  errorHandler(adminValidator),
+  errorHandler(changeToVendor)
+);
 
-router
-  .route("/rejectVendor")
-  .post(isAuthenticated, userRole("admin"), rejectVendor);
+router.post(
+  "/rejectVendor",
+  errorHandler(accessTokenValidator),
+  errorHandler(adminValidator),
+  errorHandler(rejectVendor)
+);
 
-router.route("/vendors").get(isAuthenticated, userRole("admin"), getAllVendors);
+router.get(
+  "/vendors",
+  errorHandler(accessTokenValidator),
+  errorHandler(adminValidator),
+  errorHandler(getAllVendors)
+);
 
 router
   .route("/vendors/:id")
-  .get(isAuthenticated, userRole("admin"), getSingleVendor)
-  .delete(isAuthenticated, userRole("admin"), deleteVendor);
+  .get(
+    errorHandler(accessTokenValidator),
+    errorHandler(adminValidator),
+    errorHandler(getSingleVendor)
+  )
+  .delete(
+    errorHandler(accessTokenValidator),
+    errorHandler(adminValidator),
+    errorHandler(deleteVendor)
+  );
 
 // category api
-router
-  .route("/category")
-  .post(
-    isAuthenticated,
-    userRole("admin"),
-    upload.single("image"),
-    createCategory
-  )
-  .get(getAllCategories);
+router.post(
+  "/category",
+  errorHandler(accessTokenValidator),
+  errorHandler(adminValidator),
+  upload.single("image"),
+  errorHandler(createCategory)
+);
 
-router
-  .route("/category/:id")
-  .delete(isAuthenticated, userRole("admin"), deleteCategory);
+router.delete(
+  "/category/:id",
+  errorHandler(accessTokenValidator),
+  errorHandler(adminValidator),
+  errorHandler(deleteCategory)
+);
 
 //banner api
 router
   .route("/banner")
   .post(
-    isAuthenticated,
-    userRole("admin"),
+    errorHandler(accessTokenValidator),
+    errorHandler(adminValidator),
     upload.single("image"),
-    createBanner
+    errorHandler(createBanner)
   )
-  .get(getAllBanners);
+  .get(errorHandler(getAllBanners));
 
 router
   .route("/banner/:id")
   // .get(getSingleBanner)
-  .delete(isAuthenticated, userRole("admin"), deleteBanner);
+  .delete(
+    errorHandler(accessTokenValidator),
+    errorHandler(adminValidator),
+    errorHandler(deleteBanner)
+  );
 
 module.exports = router;

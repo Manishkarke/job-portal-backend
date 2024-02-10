@@ -6,26 +6,54 @@ const {
   myApplicants,
   acceptOrRejectApplicant,
 } = require("../controller/vendor/vendorController");
-
-const { isAuthenticated, userRole } = require("../middleware/jwt_validator");
-
+const { errorHandler } = require("../middleware/errorHandler");
+const {
+  accessTokenValidator,
+  vendorValidator,
+} = require("../middleware/jwt_validator");
 const router = require("express").Router();
 
+// Job Related
 router
   .route("/jobs")
-  .post(isAuthenticated, userRole("vendor"), createJob)
-  .get(isAuthenticated, userRole("vendor"), individualVendorJobs);
+  .post(
+    errorHandler(accessTokenValidator),
+    errorHandler(vendorValidator),
+    errorHandler(createJob)
+  )
+  .get(
+    errorHandler(accessTokenValidator),
+    errorHandler(vendorValidator),
+    errorHandler(individualVendorJobs)
+  );
+
 router
   .route("/jobs/:id")
-  .delete(isAuthenticated, userRole("vendor"), deleteJob)
-  .get(isAuthenticated, userRole("vendor"), viewSingleJob);
+  .delete(
+    errorHandler(accessTokenValidator),
+    errorHandler(vendorValidator),
+    errorHandler(deleteJob)
+  )
+  .get(
+    errorHandler(accessTokenValidator),
+    errorHandler(vendorValidator),
+    errorHandler(viewSingleJob)
+  );
 
 //application
 router
   .route("/applicants")
-  .get(isAuthenticated, userRole("vendor"), myApplicants);
+  .get(
+    errorHandler(accessTokenValidator),
+    errorHandler(vendorValidator),
+    errorHandler(myApplicants)
+  );
 router
   .route("/applicants/action")
-  .post(isAuthenticated, userRole("vendor"), acceptOrRejectApplicant);
+  .post(
+    errorHandler(accessTokenValidator),
+    errorHandler(vendorValidator),
+    errorHandler(acceptOrRejectApplicant)
+  );
 
 module.exports = router;

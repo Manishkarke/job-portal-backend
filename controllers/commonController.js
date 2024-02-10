@@ -1,3 +1,4 @@
+const categoryModel = require("../model/categoryModel");
 const userModel = require("../model/userModel");
 
 // Profile get route handler function
@@ -18,7 +19,7 @@ module.exports.getProfile = async (req, res) => {
 };
 
 // Profile edit route handler function
-exports.editProfile = async (req, res) => {
+module.exports.editProfile = async (req, res) => {
   const { name, user } = req.body;
 
   console.log("User: ", req.body.user);
@@ -32,11 +33,9 @@ exports.editProfile = async (req, res) => {
     updatedFields.name = name;
   }
 
-  const updatedUser = await userModel.findByIdAndUpdate(
-    user._id,
-    updatedFields,
-    { new: true }
-  ).select("-password");
+  const updatedUser = await userModel
+    .findByIdAndUpdate(user._id, updatedFields, { new: true })
+    .select("-password");
 
   console.log("Updated user: ", updatedUser);
 
@@ -49,4 +48,9 @@ exports.editProfile = async (req, res) => {
   } else {
     return res.json({ status: 400, message: "Profile not updated" });
   }
+};
+
+module.exports.getAllCategories = async (req, res) => {
+  const categories = await categoryModel.find();
+  return res.json({ status: 200, categories });
 };
