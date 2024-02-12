@@ -117,3 +117,88 @@ module.exports.editProfileDataValidator = (name, image) => {
 
   return errors;
 };
+
+module.exports.vendorRegistrationDataValidator = ({
+  name,
+  email,
+  designation,
+  service,
+  contact,
+  address,
+}) => {
+  let errors = {};
+
+  // Name Validation
+  if (!name || !name.trim()) {
+    errors = { ...errors, name: "Name is required" };
+  } else if (!name.match(/^[a-zA-Z\s]+$/)) {
+    errors = { ...errors, name: "Name is invalid" };
+  } else {
+    errors = { ...errors, name: "" };
+  }
+
+  // Email validation
+  if (!email || !email.trim()) {
+    errors = { ...errors, email: "Email is required" };
+  } else if (!email.match(emailRegex)) {
+    errors = { ...errors, email: "Email is invalid" };
+  } else {
+    errors = { ...errors, email: "" };
+  }
+
+  // designation validation
+  if (!designation || !designation.trim()) {
+    errors = { ...errors, designation: "Designation is required" };
+  } else {
+    errors = { ...errors, designation: "" };
+  }
+
+  // Service validation
+  if (!service || !service.trim()) {
+    errors = { ...errors, service: "Service is required" };
+  } else {
+    errors = { ...errors, service: "" };
+  }
+
+  // Contact validation
+  if (!contact || !contact.trim()) {
+    errors = { ...errors, contact: "Contact is required" };
+  } else if (!contact.match(/^\d+$/)) {
+    errors = { ...errors, contact: "Contact is invalid" };
+  } else {
+    errors = { ...errors, contact: "" };
+  }
+
+  // Address validation
+  if (!address || !address.trim()) {
+    errors = { ...errors, address: "Address is required" };
+  } else {
+    errors = { ...errors, errors: "" };
+  }
+
+  return errors;
+};
+
+module.exports.jobApplyDataValidator = ({ location, contact }, cv) => {
+  let errors = {};
+
+  if (!location || !location.trim()) {
+    errors = { ...errors, location: "Location is required" };
+  } else {
+    errors = { ...errors, location: "" };
+  }
+
+  if (!contact || !contact.trim()) {
+    errors = { ...errors, contact: "Contact is required" };
+  } else {
+    errors = { ...errors, contact: "" };
+  }
+
+  if (!cv) {
+    errors = { ...errors, cv: "C.V is required" };
+  } else {
+    errors = { ...errors, cv: "" };
+  }
+
+  return errors;
+};

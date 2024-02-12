@@ -3,25 +3,34 @@ const vendorModel = require("../model/vendorModel");
 const jobModel = require("../model/jobModel");
 const appliedJobModel = require("../model/appliedJobModel");
 const reviewsModel = require("../model/reviewModel");
+const {
+  vendorRegistrationDataValidator,
+  jobApplyDataValidator,
+} = require("../services/data_validator");
+const { sendJobApplicationSuccessMail } = require("../services/mail_service");
 
-exports.registerAsVendor = async (req, res) => {
-  try {
-    const { name, email, designation, service, contact, address } = req.body;
-    const user = await userModel.findOne({
-      _id: req.userId,
-    });
+// Route handler function for vendor registration
+module.exports.registerAsVendor = async (req, res) => {
+  const { name, email, designation, service, contact, address, user } =
+    req.body;
 
-    if (!user) {
-      return res.json({ status: 400, message: "User does not exist" });
+  let errors = vendorRegistrationDataValidator(req.body);
+  let isFormValid = true;
+
+  for (const error in errors) {
+    if (errors[error]) {
+      isFormValid = false;
+      break;
     }
+  }
 
-    const existingVendor = await vendorModel.findOne({ userId: req.userId });
+  if (isFormValid) {
+    const foundUser = await userModel.findById(user._id);
+    if (!foundUser) throw "User doesn't exist";
 
+    const existingVendor = await vendorModel.findOne({ userId: user._id });
     if (existingVendor) {
-      return res.json({
-        status: 400,
-        message: "User has already applied as a vendor",
-      });
+      throw "User has already applied to be a vendor";
     } else {
       const vendor = await vendorModel.create({
         name,
@@ -30,25 +39,23 @@ exports.registerAsVendor = async (req, res) => {
         service,
         contact,
         address,
-        userId: req.userId,
+        userId: user._id,
       });
+      if (!vendor) throw "Failed to send vendor request";
 
       return res.json({
-        status: 200,
-        message: "Vendor registered successfully",
+        status: "success",
+        message: "Vendor request has been sent successfully",
+        data: null,
       });
     }
-  } catch (error) {
-    res.json({
-      status: 400,
-      message: error.message,
-    });
+  } else {
+    throw { type: "VALIDATION_ERROR", message: errors };
   }
 };
 
-exports.getAllJobs = async (req, res) => {
-  // const jobs = await jobModel.find().populate("postedBy");
-  // multiple populate
+// Route handler function to get all jobs
+module.exports.getAllJobs = async (req, res) => {
   const jobs = await jobModel
     .find()
     .populate("category")
@@ -58,12 +65,17 @@ exports.getAllJobs = async (req, res) => {
         path: "reviews",
       },
     });
-  return res.json({ status: 200, jobs });
+  if (!jobs) throw "No Jobs found";
+  return res.json({
+    status: "success",
+    message: "Jobs has been fetched successfully",
+    data: jobs,
+  });
 };
 
-exports.getSingleJob = async (req, res) => {
+// Route handler function for getting single job
+module.exports.getSingleJob = async (req, res) => {
   const { id } = req.params;
-
   const jobs = await jobModel
     .find({
       _id: id,
@@ -79,11 +91,11 @@ exports.getSingleJob = async (req, res) => {
         },
       },
     });
+  if (!job) throw "Job not found";
 
   // Loop through jobs and calculate the average rating of reviews for each job
   const jobsWithAvgRating = jobs.map((job) => {
     const reviewRatings = job.postedBy.reviews.map((review) => review.rating);
-    console.log(reviewRatings);
     const avgRating =
       reviewRatings.reduce((total, rating) => total + rating, 0) /
       reviewRatings.length;
@@ -92,11 +104,16 @@ exports.getSingleJob = async (req, res) => {
       avgRating,
     };
   });
-  return res.json({ status: 200, jobs: jobsWithAvgRating[0] });
+
+  return res.json({
+    status: "success",
+    message: "Job details has been fetched successfully",
+    data: jobsWithAvgRating[0],
+  });
 };
 
-// get job according to category
-exports.getJobByCategories = async (req, res) => {
+// Route handler function to get job with category
+module.exports.getJobByCategories = async (req, res) => {
   const { id } = req.params;
 
   const jobs = await jobModel
@@ -114,6 +131,7 @@ exports.getJobByCategories = async (req, res) => {
         },
       },
     });
+  if (!jobs) throw "No job has been found";
 
   // Loop through jobs and calculate the average rating of reviews for each job
   const jobsWithAvgRating = jobs.map((job) => {
@@ -127,105 +145,98 @@ exports.getJobByCategories = async (req, res) => {
     };
   });
 
-  return res.json({ status: 200, jobs: jobsWithAvgRating });
+  return res.json({
+    status: "success",
+    message: "Job has been fetched successfully",
+    data: jobsWithAvgRating,
+  });
 };
 
-exports.applyJob = async (req, res) => {
-  try {
-    const { jobId, location, contact } = req.body;
-    const cv = req.file.filename;
+// Route handler function for applying a job
+module.exports.applyJob = async (req, res) => {
+  const { jobId, location, contact, user } = req.body;
+  const cv = req.file.filename;
 
-    const job = await jobModel
-      .findOne({
-        _id: jobId,
-      })
-      .populate("postedBy");
-    if (!job) {
-      return res.json({ status: 400, message: "Job does not exists" });
+  let errors = jobApplyDataValidator(req.body, cv);
+  let isFormValid = true;
+
+  for (const error in errors) {
+    if (errors[error]) {
+      isFormValid = false;
+      break;
     }
-    const user = await userModel.findOne({
-      _id: req.userId,
-    });
-    if (!user) {
-      return res.json({ status: 400, message: "User does not exists" });
-    }
+  }
+
+  if (isFormValid) {
+    const job = await jobModel.findOne({ _id: jobId }).populate("postedBy");
+    if (!job) throw "Job doesn't exits";
+
+    const foundUser = await userModel.findById(user._id);
+    if (!foundUser) throw "User doesn't exists";
+
     const appliedJob = await appliedJobModel.create({
       jobId,
-      userId: req.userId,
+      userId: user._id,
       cv,
       location,
       contact,
     });
+    if (!appliedJob) throw "Failed to apply for the job";
 
-    if (appliedJob) {
-      await sendEmail({
-        email: job.postedBy.email,
-        subject: "Someone has applied for your job",
-        message: "Here is the link to your applicants",
-        text: `http://localhost:3000/${cv}`,
-      });
-      return res.json({ status: 200, message: "Job applied successfully" });
-    } else {
-      return res.json({ status: 400, message: "Job not applied" });
-    }
-  } catch (e) {
-    console.log(e);
-    res.json({
-      status: 400,
-      message: e.message,
-    });
-  }
-};
-
-exports.rateVendor = async (req, res) => {
-  try {
-    const user = await userModel.findById(req.params.id);
-    const review = new Review();
-    review.author = req.userId;
-    review.message = req.body.message;
-    review.rating = req.body.rating;
-    console.log(review);
-    user.reviews.push(review);
-    await review.save();
-    await user.save();
-    res.json({ status: 200, message: "Review added successfully" });
-  } catch (e) {
-    console.log(e);
-    res.json({
-      status: 400,
-      message: e.message,
-    });
-  }
-};
-
-// profile
-
-exports.getAllAppliedJobs = async (req, res) => {
-  try {
-    const jobs = await appliedJobModel.find({ userId: req.userId }).populate({
-      path: "jobId",
-      populate: [{ path: "postedBy" }, { path: "category" }],
-    });
-
-    return res.json({ status: 200, jobs });
-  } catch (error) {
+    const option = { email: user.email };
+    await sendJobApplicationSuccessMail(option);
     return res.json({
-      status: 400,
-      message: error.message,
+      status: "success",
+      message: "Job application has been sent successfully",
+      data: null,
     });
+  } else {
+    throw { type: "VALIDATION_ERROR", message: errors };
   }
 };
 
-exports.getSingleAppliedJob = async (req, res) => {
-  const { id } = req.params;
-  const jobs = await appliedJobModel
-    .find({
-      _id: id,
-    })
-    .populate({
-      path: "jobId",
-      populate: [{ path: "postedBy" }, { path: "category" }],
-    });
+// TODO: Need to work on rate vendor route handler function
+// Route handler function for rating a vendor
+module.exports.rateVendor = async (req, res) => {
+  const user = await userModel.findById(req.params.id);
+  const review = new Review();
+  review.author = req.userId;
+  review.message = req.body.message;
+  review.rating = req.body.rating;
+  console.log(review);
+  user.reviews.push(review);
+  await review.save();
+  await user.save();
+  res.json({ status: 200, message: "Review added successfully" });
+};
 
-  return res.json({ status: 200, jobs: jobs[0] });
+// Route handler function for getting all applied jobs
+module.exports.getAllAppliedJobs = async (req, res) => {
+  const jobs = await appliedJobModel.find({ userId: req.user._id }).populate({
+    path: "jobId",
+    populate: [{ path: "postedBy" }, { path: "category" }],
+  });
+  if (!jobs) throw "You haven't applied for any jobs.";
+
+  return res.json({
+    status: "success",
+    message: "Applied jobs has been fetched successfully",
+    data: jobs,
+  });
+};
+
+// Route handler function for getting all the job applications
+module.exports.getSingleAppliedJob = async (req, res) => {
+  const { id } = req.params;
+  const job = await appliedJobModel.findById(id).populate({
+    path: "jobId",
+    populate: [{ path: "postedBy" }, { path: "category" }],
+  });
+  if (!job) throw "No job with the given id was found";
+
+  return res.json({
+    status: "success",
+    message: "Job has been fetched successfully",
+    data: job,
+  });
 };

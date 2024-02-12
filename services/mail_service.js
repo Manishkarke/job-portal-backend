@@ -104,3 +104,19 @@ module.exports.sendResetMail = async (option) => {
     console.error(err);
   }
 };
+
+module.exports.sendJobApplicationSuccessMail = async (option) => {
+  try {
+    const htmlContent = `your job application has been sent successfully`;
+    const mailOptions = {
+      from: "Manish Karki <mk4345437@gmail.com>",
+      to: option.email,
+      subject: "Your job application has been sent",
+      html: htmlContent,
+    };
+
+    await transporter.sendMail(mailOptions);
+  } catch (err) {
+    console.error(err);
+  }
+};
