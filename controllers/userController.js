@@ -2,10 +2,7 @@ const userModel = require("../model/userModel");
 const vendorModel = require("../model/vendorModel");
 const jobModel = require("../model/jobModel");
 const appliedJobModel = require("../model/appliedJobModel");
-// const sendEmail = require("../services/");
 const reviewsModel = require("../model/reviewModel");
-// const Review = require("../model/reviewsModel");
-const otpGenerator = require("../services/otpGenerator");
 
 exports.registerAsVendor = async (req, res) => {
   try {

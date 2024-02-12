@@ -1,5 +1,6 @@
 const categoryModel = require("../model/categoryModel");
 const userModel = require("../model/userModel");
+const { editProfileDataValidator } = require("../services/data_validator");
 
 // Profile get route handler function
 module.exports.getProfile = async (req, res) => {
@@ -21,37 +22,44 @@ module.exports.getProfile = async (req, res) => {
 // Profile edit route handler function
 module.exports.editProfile = async (req, res) => {
   const { name, user } = req.body;
-
-  console.log("User: ", req.body.user);
   const image = req.file.filename;
 
-  const updatedFields = {
-    image: `http://localhost:3000/${image}`,
-  };
+  // For Error handling
+  let errors = editProfileDataValidator(name, image);
+  let isFormValid = true;
 
-  if (name) {
-    updatedFields.name = name;
+  for (const error in errors) {
+    if (errors[error]) {
+      isFormValid = false;
+      break;
+    }
   }
 
-  const updatedUser = await userModel
-    .findByIdAndUpdate(user._id, updatedFields, { new: true })
-    .select("-password");
+  if (isFormValid) {
+    const updatedFields = { image: `http://localhost:3000/${image}` };
 
-  console.log("Updated user: ", updatedUser);
+    if (name) {
+      updatedFields.name = name;
+    }
 
-  if (updatedUser) {
+    const updatedUser = await userModel
+      .findByIdAndUpdate(user._id, updatedFields, { new: true })
+      .select("-password");
+    if (!updatedUser) throw "Failed to update profile";
+
     return res.json({
       status: "success",
-      message: "Profile updated successfully",
+      message: "Profile has been updated successfully",
       data: updatedUser,
     });
   } else {
-    return res.json({ status: 400, message: "Profile not updated" });
+    throw { type: "VALIDATION_ERROR", message: errors };
   }
 };
 
 module.exports.getAllCategories = async (req, res) => {
   const categories = await categoryModel.find();
+  if (!categories) throw "No categories found";
   return res.json({ status: 200, categories });
 };
 

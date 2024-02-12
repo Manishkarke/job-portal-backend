@@ -97,3 +97,23 @@ module.exports.bannerDataValidator = (title, image) => {
 
   return errors;
 };
+
+module.exports.editProfileDataValidator = (name, image) => {
+  let errors = {};
+
+  if (!name || !name.trim()) {
+    errors = { ...errors, name: "Name is required" };
+  } else if (!name.match(/^[a-zA-Z\s]+$/)) {
+    errors = { ...errors, name: "Name is invalid" };
+  } else {
+    errors = { ...errors, name: "" };
+  }
+
+  if (!image) {
+    errors = { ...errors, image: "Image is required" };
+  } else {
+    errors = { ...errors, image: "" };
+  }
+
+  return errors;
+};
