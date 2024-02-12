@@ -202,3 +202,60 @@ module.exports.jobApplyDataValidator = ({ location, contact }, cv) => {
 
   return errors;
 };
+
+module.exports.createJobDataValidator = ({
+  title,
+  description,
+  location,
+  salary,
+  deadline,
+  categoryId,
+}) => {
+  let errors = {};
+
+  // Title validation
+  if (!title || !title.trim()) {
+    errors = { ...errors, title: "Title is required" };
+  } else if (!title.match(/^[a-zA-Z\s]+$/)) {
+    errors = { ...errors, title: "Title is invalid" };
+  } else {
+    errors = { ...errors, title: "" };
+  }
+
+  // Description validation
+  if (!description || !description.trim()) {
+    errors = { ...errors, description: "Description is required" };
+  } else {
+    errors = { ...errors, description: "" };
+  }
+
+  // Location validation
+  if (!location || !location.trim()) {
+    errors = { ...errors, location: "Location is required" };
+  } else {
+    errors = { ...errors, location: "" };
+  }
+
+  // salary validation
+  if (!salary) {
+    errors = { ...errors, salary: "Salary is required" };
+  } else {
+    errors = { ...errors, salary: "" };
+  }
+
+  // deadline validation
+  if (!deadline) {
+    errors = { ...errors, deadline: "Deadline is required" };
+  } else {
+    errors = { ...errors, deadline: "" };
+  }
+
+  // Category id
+  if (!category) {
+    errors = { ...errors, category: "Category is required" };
+  } else {
+    errors = { ...errors, category: "" };
+  }
+
+  return errors;
+};

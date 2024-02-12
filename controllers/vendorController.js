@@ -1,60 +1,82 @@
 const appliedJobModel = require("../model/appliedJobModel");
 const jobModel = require("../model/jobModel");
+const { createJobDataValidator } = require("../services/data_validator");
 
-exports.createJob = async (req, res) => {
+// route handler function for creating job
+module.exports.createJob = async (req, res) => {
   const { title, description, location, salary, deadline, categoryId } =
     req.body;
 
-  if (!title || !description || !location || !salary || !deadline)
-    return res.json({ status: 400, message: "Please fill all the fields" });
+  let errors = createJobDataValidator(req.body);
+  let isFormValid = true;
 
-  const job = await jobModel.create({
-    title,
-    description,
-    location,
-    salary,
-    deadline,
-    postedBy: req.userId,
-    category: categoryId,
-  });
-  console.log(categoryId);
-  if (job) {
-    return res.json({ status: 200, message: "Job created successfully" });
+  for (const error in errors) {
+    if (errors[error]) {
+      isFormValid = false;
+      break;
+    }
+  }
+
+  if (isFormValid) {
+    const job = await jobModel.create({
+      title,
+      description,
+      location,
+      salary,
+      deadline,
+      postedBy: req.user._id,
+      category: categoryId,
+    });
+    if (!job) throw "Failed to create job";
+
+    return res.json({
+      status: "success",
+      message: "Job has been created successfully",
+      data: null,
+    });
   } else {
-    return res.json({ status: 400, message: "Job not created" });
+    throw { type: "VALIDATION_ERROR", message: errors };
   }
 };
 
-exports.individualVendorJobs = async (req, res) => {
-  const jobs = await jobModel.find({ postedBy: req.userId });
-  return res.json({ status: 200, jobs });
+// Route handler function for getting individual job
+module.exports.individualVendorJobs = async (req, res) => {
+  const jobs = await jobModel.find({ postedBy: req.user._id });
+  if (!jobs) throw "No jobs has been posted";
+  return res.json({
+    status: "success",
+    message: "Jobs has been fetched successfully",
+    data: jobs,
+  });
 };
 
-exports.deleteJob = async (req, res) => {
+// Route handler function for deleting a job
+module.exports.deleteJob = async (req, res) => {
   const { id } = req.params;
   const job = await jobModel.findByIdAndDelete(id);
-  if (job)
-    return res.json({ status: 200, message: "Job deleted successfully" });
-  else return res.json({ status: 400, message: "Job not deleted" });
+  if (!job) throw "Failed to delete the job";
+  return res.json({
+    status: "success",
+    message: "Job has been deleted successfully",
+    data: null,
+  });
 };
 
-exports.viewSingleJob = async (req, res) => {
-  try {
-    const { id } = req.params;
-    const job = await jobModel.findOne({
-      _id: id,
-    });
-    return res.json({ status: 200, job });
-  } catch (error) {
-    res.json({
-      status: 400,
-      message: error.message,
-    });
-  }
+// Route handler function for viewing single job
+module.exports.viewSingleJob = async (req, res) => {
+  const { id } = req.params;
+  const job = await jobModel.findById(id);
+  if (!job) throw "Failed to fetch job details";
+  return res.json({
+    status: "success",
+    message: "Job details has been fetched successfully",
+    data: job,
+  });
 };
 
-exports.myApplicants = async (req, res) => {
-  const jobs = await jobModel.find({ postedBy: req.userId });
+// Route handler function for viewing applicants
+module.exports.myApplicants = async (req, res) => {
+  const jobs = await jobModel.find({ postedBy: req.user._id });
 
   //find all the applicants for the jobs posted by the vendor
   const applicants = await appliedJobModel
@@ -62,13 +84,18 @@ exports.myApplicants = async (req, res) => {
       jobId: { $in: jobs.map((job) => job._id) },
     })
     .populate("userId");
-
-  return res.json({ status: 200, applicants });
+  if (!applicants) throw "No applicants for this job has been found";
+  return res.json({
+    status: "success",
+    message: "Applicants has been fetched successfully",
+    data: applicants,
+  });
 };
 
-exports.acceptOrRejectApplicant = async (req, res) => {
+// TODO: Need to remove this accept or reject applicants 
+// Route handler function for accepting or rejecting applicants
+module.exports.acceptOrRejectApplicant = async (req, res) => {
   const { applicantId } = req.body;
-  console.log(req.body);
   let applicant;
   if (req.body.status === "accepted") {
     applicant = await appliedJobModel.findByIdAndUpdate(
