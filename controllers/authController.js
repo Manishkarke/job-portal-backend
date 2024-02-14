@@ -132,6 +132,13 @@ module.exports.signIn = async (req, res) => {
         reviews: emailExists.reviews,
         isVerified: emailExists.isVerified,
       };
+      const updatedUser = await userModel.findByIdAndUpdate(
+        emailExists._id,
+        {
+          refreshToken: refreshToken,
+        },
+        { new: true }
+      );
 
       return res.json({
         status: "success",
