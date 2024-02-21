@@ -20,9 +20,9 @@ module.exports.accessTokenValidator = async (req, res, next) => {
 };
 
 // TODO: Add refresh token validator middleware
-// module.exports.refreshTokenValidator = async (req, res, next) => {
-//   const
-// }
+module.exports.refreshTokenValidator = async (req, res, next) => {
+  
+}
 
 // User validator
 module.exports.userValidator = async (req, res, next) => {
@@ -39,7 +39,7 @@ module.exports.userValidator = async (req, res, next) => {
 module.exports.vendorValidator = async (req, res, next) => {
   const { user } = req.body;
 
-  console.log(user.role);
+  console.log("user: ",user);
   if (user.role !== "vendor") {
     throw "You are not a vendor.";
   }

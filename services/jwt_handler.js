@@ -1,5 +1,6 @@
 const jwt = require("jsonwebtoken");
 
+// create new access Token
 module.exports.createAccessToken = (userEmail) => {
   const accessToken = jwt.sign(
     { email: userEmail },
@@ -9,6 +10,8 @@ module.exports.createAccessToken = (userEmail) => {
 
   return accessToken;
 };
+
+// create new Refresh Token
 module.exports.createRefreshToken = (userEmail) => {
   const refreshToken = jwt.sign(
     { email: userEmail },
@@ -19,6 +22,7 @@ module.exports.createRefreshToken = (userEmail) => {
   return refreshToken;
 };
 
+// Validate a access token
 module.exports.validateAccessToken = (accessToken) => {
   try {
     const jwtVerification = jwt.verify(
@@ -38,12 +42,14 @@ module.exports.validateAccessToken = (accessToken) => {
   }
 };
 
+// Validate the refresh token
 module.exports.validateRefreshToken = (refreshToken) => {
   try {
     const jwtVerification = jwt.verify(
       refreshToken,
       process.env.REFRESH_TOKEN_SECRET_KEY
     );
+    return jwtVerification.email;
   } catch (error) {
     if (
       error.message === "jwt malformed" ||

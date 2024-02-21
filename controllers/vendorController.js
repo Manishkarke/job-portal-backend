@@ -9,6 +9,7 @@ module.exports.createJob = async (req, res) => {
 
   let errors = createJobDataValidator(req.body);
   let isFormValid = true;
+  console.log("user: ", req.user);
 
   for (const error in errors) {
     if (errors[error]) {
@@ -24,7 +25,7 @@ module.exports.createJob = async (req, res) => {
       location,
       salary,
       deadline,
-      postedBy: req.user._id,
+      postedBy: req.body.user._id,
       category: categoryId,
     });
     if (!job) throw "Failed to create job";
@@ -41,8 +42,10 @@ module.exports.createJob = async (req, res) => {
 
 // Route handler function for getting individual job
 module.exports.individualVendorJobs = async (req, res) => {
-  const jobs = await jobModel.find({ postedBy: req.user._id });
-  if (!jobs) throw "No jobs has been posted";
+  const jobs = await jobModel
+    .find({ postedBy: req.body.user._id })
+    .populate("category");
+  if (!jobs || jobs.length === 0) throw "No jobs has been posted";
   return res.json({
     status: "success",
     message: "Jobs has been fetched successfully",
@@ -92,7 +95,7 @@ module.exports.myApplicants = async (req, res) => {
   });
 };
 
-// TODO: Need to remove this accept or reject applicants 
+// TODO: Need to remove this accept or reject applicants
 // Route handler function for accepting or rejecting applicants
 module.exports.acceptOrRejectApplicant = async (req, res) => {
   const { applicantId } = req.body;

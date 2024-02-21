@@ -251,7 +251,7 @@ module.exports.createJobDataValidator = ({
   }
 
   // Category id
-  if (!category) {
+  if (!categoryId) {
     errors = { ...errors, category: "Category is required" };
   } else {
     errors = { ...errors, category: "" };

@@ -6,6 +6,7 @@ function mongoConnection(url) {
     .connect(url, {
       useNewUrlParser: true,
       useUnifiedTopology: true,
+      dbName: "job-portal",
     })
     .then(() => {
       console.log("Connected to MongoDB");

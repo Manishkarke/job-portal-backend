@@ -9,12 +9,12 @@ const {
 
 // Route handler function for accepting vendor request
 module.exports.changeToVendor = async (req, res) => {
-  const { user } = req.body;
-  const foundUser = await userModel.findById(user._id);
+  const { userId } = req.body;
+  const foundUser = await userModel.findById(userId);
   foundUser.role = "vendor";
   const changeVendorStatus = await vendorModel.findOneAndUpdate(
     {
-      userId: user._id,
+      userId: userId,
     },
     {
       status: "approved",
@@ -22,7 +22,7 @@ module.exports.changeToVendor = async (req, res) => {
   );
 
   if (!changeVendorStatus) throw "Failed to change user to vendor.";
-  await user.save();
+  await foundUser.save();
   return res.json({
     status: "success",
     message: "User is now a vendor",
@@ -32,12 +32,12 @@ module.exports.changeToVendor = async (req, res) => {
 
 // Route handler function for rejecting vendor request
 module.exports.rejectVendor = async (req, res) => {
-  const { user } = req.body;
-  const foundUser = await userModel.findById(user._id);
+  const { userId } = req.body;
+  const foundUser = await userModel.findById(userId);
   foundUser.role = "user";
   const changeVendorStatus = await vendorModel.findOneAndUpdate(
     {
-      userId: user._id,
+      userId: userId,
     },
     {
       status: "rejected",

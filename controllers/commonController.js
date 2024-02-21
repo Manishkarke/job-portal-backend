@@ -60,7 +60,11 @@ module.exports.editProfile = async (req, res) => {
 module.exports.getAllCategories = async (req, res) => {
   const categories = await categoryModel.find();
   if (!categories) throw "No categories found";
-  return res.json({ status: 200, categories });
+  return res.json({
+    status: "success",
+    message: "Categories has been fetched successfully",
+    data: categories,
+  });
 };
 
 // Route handler function for Getting all the Banners

@@ -140,12 +140,17 @@ module.exports.signIn = async (req, res) => {
         { new: true }
       );
 
+      // Saving my fresh token in the cookie
+      res.cookie("refreshToken", refreshToken, {
+        maxAge: 24 * 60 * 60 * 1000,
+        secure: true,
+      });
+
       return res.json({
         status: "success",
         message: "Welcome back! You have successfully logged in.",
         data: {
           accessToken: accessToken,
-          refreshToken: refreshToken,
           user: userData,
         },
       });
