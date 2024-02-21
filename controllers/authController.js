@@ -230,3 +230,27 @@ module.exports.resetPassword = async (req, res) => {
     data: null,
   });
 };
+
+// Generate new access token route handler function
+module.exports.generateNewAccessToken = async (req, res) => {
+  const { user } = req.body;
+  if (!user) throw "Failed to get data from cookie.";
+
+  const newAccessToken = createAccessToken(user.email);
+  const newRefreshToken = createRefreshToken(user.email);
+
+  const updatedUser = await userModel.findByIdAndUpdate(
+    user._id,
+    {
+      refreshToken: newRefreshToken,
+    },
+    { new: true }
+  );
+  if (!updatedUser) throw "Failed to create new access token";
+
+  res.json({
+    status: "success",
+    message: "New access token has been generated successfully",
+    data: newAccessToken,
+  });
+};

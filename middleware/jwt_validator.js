@@ -21,8 +21,20 @@ module.exports.accessTokenValidator = async (req, res, next) => {
 
 // TODO: Add refresh token validator middleware
 module.exports.refreshTokenValidator = async (req, res, next) => {
-  
-}
+  const { refreshToken } = req.cookies;
+  if (!refreshToken) throw "Refresh Token not found";
+
+  const foundUser = await userModel
+    .findOne({ refreshToken: refreshToken })
+    .select("-password");
+  if (!foundUser) throw "User don't have refresh token";
+
+  const userEmail = jwtHanlder.validateRefreshToken(refreshToken);
+  if (foundUser.email !== userEmail) throw "Refresh token did not match";
+
+  req.body.user = foundUser;
+  next();
+};
 
 // User validator
 module.exports.userValidator = async (req, res, next) => {
@@ -39,7 +51,7 @@ module.exports.userValidator = async (req, res, next) => {
 module.exports.vendorValidator = async (req, res, next) => {
   const { user } = req.body;
 
-  console.log("user: ",user);
+  console.log("user: ", user);
   if (user.role !== "vendor") {
     throw "You are not a vendor.";
   }
