@@ -144,6 +144,7 @@ module.exports.signIn = async (req, res) => {
       res.cookie("refreshToken", refreshToken, {
         maxAge: 24 * 60 * 60 * 1000,
         secure: true,
+        httpOnly: true,
       });
 
       return res.json({
@@ -240,7 +241,7 @@ module.exports.logout = async (req, res) => {
     { new: true }
   );
   if (!loggedOutUser) throw "failed to log out user";
-
+  res.clearCookie("refreshToken");
   res.json({
     status: "success",
     message: "User has been logged out successfully",
@@ -264,7 +265,11 @@ module.exports.generateNewAccessToken = async (req, res) => {
     { new: true }
   );
   if (!updatedUser) throw "Failed to create new access token";
-
+  res.cookie("refreshToken", newRefreshToken, {
+    maxAge: 24 * 60 * 60 * 1000,
+    secure: true,
+    httpOnly: true,
+  });
   res.json({
     status: "success",
     message: "New access token has been generated successfully",

@@ -5,7 +5,7 @@ module.exports.createAccessToken = (userEmail) => {
   const accessToken = jwt.sign(
     { email: userEmail },
     process.env.ACCESS_TOKEN_SECRET_KEY,
-    { expiresIn: "1d" }
+    { expiresIn: "6hr" }
   );
 
   return accessToken;
