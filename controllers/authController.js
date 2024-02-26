@@ -198,7 +198,7 @@ module.exports.verifyOtp = async (req, res) => {
   if (emailExists.otp !== otp) throw "The OTP entered is incorrect.";
 
   return res.json({
-    status: 200,
+    status: "success",
     message: "Otp verified successfully.",
     data: null,
   });
@@ -212,7 +212,6 @@ module.exports.resetPassword = async (req, res) => {
   else if (!email.match(emailRegex)) throw "Email is invalid.";
 
   if (!otp || !otp.trim()) throw "The OTP is required";
-
   if (!password || !password.trim()) throw "Password is required";
 
   const user = await userModel.findOne({ email });
@@ -227,6 +226,24 @@ module.exports.resetPassword = async (req, res) => {
   return res.json({
     status: "success",
     message: "Password has been changed.",
+    data: null,
+  });
+};
+
+// Log out route handler function
+module.exports.logout = async (req, res) => {
+  const { user } = req.body;
+
+  const loggedOutUser = await userModel.findByIdAndUpdate(
+    user._id,
+    { refreshToken: "" },
+    { new: true }
+  );
+  if (!loggedOutUser) throw "failed to log out user";
+
+  res.json({
+    status: "success",
+    message: "User has been logged out successfully",
     data: null,
   });
 };

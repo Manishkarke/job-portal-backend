@@ -6,9 +6,13 @@ const {
   verifyOtp,
   resetPassword,
   generateNewAccessToken,
+  logout,
 } = require("../controllers/authController");
 const { errorHandler } = require("../middleware/errorHandler");
-const { refreshTokenValidator } = require("../middleware/jwt_validator");
+const {
+  refreshTokenValidator,
+  accessTokenValidator,
+} = require("../middleware/jwt_validator");
 
 const router = require("express").Router();
 
@@ -24,6 +28,11 @@ router.post(
   "/generateAccessToken",
   errorHandler(refreshTokenValidator),
   errorHandler(generateNewAccessToken)
+);
+router.post(
+  "/log-out",
+  errorHandler(accessTokenValidator),
+  errorHandler(logout)
 );
 
 module.exports = router;

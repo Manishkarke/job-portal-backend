@@ -46,7 +46,7 @@ module.exports.rejectVendor = async (req, res) => {
 
   if (!changeVendorStatus) throw "Failed to reject vendor request";
 
-  await user.save();
+  await foundUser.save();
   return res.json({
     status: "success",
     message: "Request rejected successfully",
