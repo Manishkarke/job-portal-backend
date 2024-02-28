@@ -61,6 +61,7 @@ module.exports.getAllJobs = async (req, res) => {
     .populate("category")
     .populate({
       path: "postedBy",
+      select: "image email name reviews _id",
       populate: {
         path: "reviews",
       },
@@ -83,6 +84,7 @@ module.exports.getSingleJob = async (req, res) => {
     .populate("category")
     .populate({
       path: "postedBy",
+      select: "image email name reviews _id",
       populate: {
         path: "reviews",
         populate: {

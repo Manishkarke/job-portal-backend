@@ -75,6 +75,11 @@ module.exports.verifyRegistration = async (req, res) => {
   if (emailExists.otp !== otp) {
     throw "otp didn't match";
   } else {
+    const otpExpirationTime = new Date(
+      emailExists.updatedAt.getTime() + 5 * 60 * 1000
+    );
+    if (otpExpirationTime < new Date()) throw "The OTP has expired.";
+    
     await userModel.findByIdAndUpdate(
       emailExists._id,
       {
@@ -197,6 +202,11 @@ module.exports.verifyOtp = async (req, res) => {
   if (!emailExists) throw "Email is not registered.";
 
   if (emailExists.otp !== otp) throw "The OTP entered is incorrect.";
+
+  const otpExpirationTime = new Date(
+    emailExists.updatedAt.getTime() + 5 * 60 * 1000
+  );
+  if (otpExpirationTime < new Date()) throw "The OTP has expired.";
 
   return res.json({
     status: "success",
